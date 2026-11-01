@@ -18,7 +18,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
-        with: { aws-region: ap-southeast-2, role-to-assume: ${{ env.AWS_ROLE_ARN }} }
+        with:
+          aws-region: ap-southeast-2
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
       - id: ecr
         uses: aws-actions/amazon-ecr-login@v2
       - uses: docker/setup-qemu-action@v3
@@ -39,9 +41,14 @@ jobs:
             VITE_SSO_REDIRECT_URI=https://courier.io.vn/conversa/oauth/callback/courier
       - id: token
         uses: actions/create-github-app-token@v2
-        with: { app-id: ${{ env.RELEASE_APP_ID }}, private-key: ${{ env.RELEASE_APP_PRIVATE_KEY }}, owner: vucongthanh92, repositories: courier-common }
+        with:
+          app-id: ${{ env.RELEASE_APP_ID }}
+          private-key: ${{ env.RELEASE_APP_PRIVATE_KEY }}
+          owner: vucongthanh92
+          repositories: courier-common
       - name: Promote immutable image through GitOps
-        env: { GH_TOKEN: ${{ steps.token.outputs.token }} }
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
         run: |
           set -euo pipefail
           git clone "https://x-access-token:${GH_TOKEN}@github.com/vucongthanh92/courier-common.git" common
