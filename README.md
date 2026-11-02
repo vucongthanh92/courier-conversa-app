@@ -36,6 +36,24 @@ VITE_APP_OAUTH_CALLBACK_BASE_URL=http://localhost:8080/oauth/callback
 
 Keep real values in `.env.local`; this file is ignored by Git.
 
+## AWS development Google OAuth
+
+The production-like dev image receives the **public** Google Client ID from
+the `OAUTH_GOOGLE_CLIENT_ID` GitHub Actions repository variable. The release
+workflow maps it to `VITE_GOOGLE_OAUTH_CLIENT_ID` while building the static
+bundle and fails before publishing an image if the variable is absent.
+
+The Google OAuth Web Client must allow:
+
+```text
+Authorized JavaScript origin: https://courier.io.vn
+Authorized redirect URI: https://courier.io.vn/api/user/api/v1/auth/identity/google/callback
+```
+
+`OAUTH_GOOGLE_CLIENT_SECRET` must never be added to this repository or its
+frontend workflow. It belongs only in the SOPS-encrypted `user-service`
+configuration, alongside the same Client ID.
+
 Flow:
 
 - The app redirects to Google or GitHub with a Courier OAuth state containing the return URL.
