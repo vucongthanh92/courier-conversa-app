@@ -15,6 +15,7 @@ jobs:
       ECR_REPOSITORY: courier/conversa-app
       RELEASE_APP_ID: ${{ secrets.COURIER_RELEASE_APP_ID }}
       RELEASE_APP_PRIVATE_KEY: ${{ secrets.COURIER_RELEASE_APP_PRIVATE_KEY }}
+      GOOGLE_OAUTH_CLIENT_ID: ${{ vars.OAUTH_GOOGLE_CLIENT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
@@ -25,6 +26,12 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
+      - name: Validate Google OAuth build configuration
+        run: |
+          test -n "$GOOGLE_OAUTH_CLIENT_ID" || {
+            echo "Repository variable OAUTH_GOOGLE_CLIENT_ID is required for the dev release." >&2
+            exit 1
+          }
       - uses: docker/build-push-action@v6
         with:
           context: .
@@ -37,6 +44,9 @@ jobs:
             VITE_CHAT_API_BASE_URL=https://courier.io.vn/api/chat/api/v1
             VITE_CHAT_WS_URL=wss://courier.io.vn/api/chat/api/v1/ws
             VITE_FLIKK_APP_URL=https://courier.io.vn/flikk/
+            VITE_GOOGLE_OAUTH_CLIENT_ID=${{ env.GOOGLE_OAUTH_CLIENT_ID }}
+            VITE_GOOGLE_OAUTH_REDIRECT_URI=https://courier.io.vn/api/user/api/v1/auth/identity/google/callback
+            VITE_APP_OAUTH_CALLBACK_BASE_URL=https://courier.io.vn/conversa/oauth/callback
             VITE_SSO_CLIENT_ID=conversa-web
             VITE_SSO_REDIRECT_URI=https://courier.io.vn/conversa/oauth/callback/courier
       - id: token
